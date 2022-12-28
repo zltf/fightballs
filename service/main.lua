@@ -3,7 +3,8 @@ local runconfig = require "runconfig"
 
 skynet.start(function()
     -- 初始化
-    skynet.error(runconfig.agentmgr.node)
+    skynet.error("[start main]")
+    skynet.newservice("gateway", "gateway", 1)
     -- 退出自身
     skynet.exit()
 end)
