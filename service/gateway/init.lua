@@ -1,7 +1,8 @@
-local skynet = require "skynet"
-local s = require "service"
-local socket = require "skynet.socket"
-local runconfig = require "runconfig"
+local Skynet = require "skynet"
+local Service = require "service"
+local Socket = require "skynet.socket"
+local RunCfg = require "runconfig"
+local Log = require "log"
 
 local conns = {} -- fd -> conn，连接和玩家的关联
 local players = {} -- playerid -> gateplayer，玩家和agent的关联
@@ -34,39 +35,39 @@ end
 -- 每一条连接接收数据处理
 -- 协议格式：cmd,arg1,arg2,...#
 local function recv_loop(fd)
-    socket.start(fd)
-    skynet.error("socket connected " .. fd)
+    Socket.start(fd)
+    Log.info("socket connected " .. fd)
     local readbuff = ""
     while true do
-        local recvstr = socket.read(fd)
+        local recvstr = Socket.read(fd)
         if recvstr then
             readbuff = readbuff .. recvstr
             readbuff = process_buff(fd, readbuff)
         else
-            skynet.error("socket close " .. fd)
+            Log.info("socket close " .. fd)
             disconnect(fd)
-            socket.close(fd)
+            Socket.close(fd)
             return
         end
     end
 end
 
 local function connect(fd, addr)
-    skynet.error("connect from " .. addr .. " " .. fd)
+    Log.info("connect from " .. addr .. " " .. fd)
     local c = conn()
     conns[fd] = c
     c.fd = fd
-    skynet.fork(recv_loop, fd)
+    Skynet.fork(recv_loop, fd)
 end
 
-function s.init()
-    local node = skynet.getenv("node")
-    local nodecfg = runconfig[node]
-    local port = nodecfg.gateway[s.id].port
+function Service.init()
+    local node = Skynet.getenv("node")
+    local node_cfg = RunCfg[node]
+    local port = node_cfg.gateway[Service.id].port
 
-    local listenfd = socket.listen("0.0.0.0", port)
-    skynet.error("Listen socket :", "0.0.0.0", port)
-    socket.start(listenfd, connect)
+    local listenfd = Socket.listen("0.0.0.0", port)
+    Log.info("Listen socket :", "0.0.0.0", port)
+    Socket.start(listenfd, connect)
 end
 
-s.start(...)
+Service.start(...)

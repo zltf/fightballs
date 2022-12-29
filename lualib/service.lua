@@ -1,5 +1,6 @@
-local skynet = require "skynet"
-local cluster = require "skynet.cluster"
+local Skynet = require "skynet"
+local Cluster = require "skynet.cluster"
+local Log = require "log"
 
 local M = {
     -- 类型和id
@@ -13,14 +14,14 @@ local M = {
 }
 
 local function traceback(err)
-    skynet.error(tostring(err))
-    skynet.error(debug.traceback())
+    Log.error(tostring(err))
+    Log.error(debug.traceback())
 end
 
 local function dispatch(session, address, cmd, ...)
     local fun = M.resp[cmd]
     if not fun then
-        skynet.ret()
+        Skynet.ret()
         return
     end
 
@@ -28,15 +29,15 @@ local function dispatch(session, address, cmd, ...)
     local isok = ret[1]
 
     if not isok then
-        skynet.ret()
+        Skynet.ret()
         return
     end
 
-    skynet.retpack(table.unpack(ret, 2))
+    Skynet.retpack(table.unpack(ret, 2))
 end
 
 local function init()
-    skynet.dispatch("lua", dispatch)
+    Skynet.dispatch("lua", dispatch)
     if M.init then
         M.init()
     end
@@ -45,24 +46,24 @@ end
 function M.start(name, id, ...)
     M.name = name
     M.id = tonumber(id)
-    skynet.start(init)
+    Skynet.start(init)
 end
 
 function M.call(node, srv, ...)
-    local mynode = skynet.getenv("node")
+    local mynode = Skynet.getenv("node")
     if node == mynode then
-        return skynet.call(srv, "lua", ...)
+        return Skynet.call(srv, "lua", ...)
     else
-        return cluster.call(node, srv, ...)
+        return Cluster.call(node, srv, ...)
     end
 end
 
 function M.send(node, srv, ...)
-    local mynode = skynet.getenv("node")
+    local mynode = Skynet.getenv("node")
     if node == mynode then
-        return skynet.send(srv, "lua", ...)
+        return Skynet.send(srv, "lua", ...)
     else
-        return cluster.send(node, srv, ...)
+        return Cluster.send(node, srv, ...)
     end
 end
 
