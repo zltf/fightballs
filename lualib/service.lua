@@ -7,10 +7,10 @@ local M = {
     name = "",
     id = 0,
     -- 回调函数
-    exit = nil,
     init = nil,
+    exit = nil,
     -- 分发方法
-    resp = {},
+    cmd = {},
 }
 
 local function traceback(err)
@@ -19,21 +19,11 @@ local function traceback(err)
 end
 
 local function dispatch(session, address, cmd, ...)
-    local fun = M.resp[cmd]
-    if not fun then
-        Skynet.ret()
-        return
-    end
-
-    local ret = table.pack(xpcall(fun, traceback, address, ...))
-    local isok = ret[1]
-
-    if not isok then
-        Skynet.ret()
-        return
-    end
-
-    Skynet.retpack(table.unpack(ret, 2))
+    local fun = assert(M.cmd[cmd], cmd)
+    local ok, err = pcall(fun, address, ...)
+    if not ok then
+        traceback(err)
+    end 
 end
 
 local function init()
