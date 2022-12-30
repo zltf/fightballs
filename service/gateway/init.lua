@@ -3,33 +3,62 @@ local Service = require "service"
 local Socket = require "skynet.socket"
 local RunCfg = require "runconfig"
 local Log = require "log"
+local Pack = require "pack"
 
-local conns = {} -- fd -> conn，连接和玩家的关联
-local players = {} -- playerid -> gateplayer，玩家和agent的关联
+local Command = require "command"
+local Global = require "global"
 
--- 连接类
-function conn()
-    local m = {
-        fd = nil,
-        playerid = nil,
-    }
-    return m
-end
+Service.cmd = Command
 
--- 玩家类
-function gateplayer()
-    local m = {
-        playerid = nil,
-        agent = nil,
-        conn = nil,
-    }
-    return m
+local function process_msg(fd, msgstr)
+    local cmd, msg = Pack.str_unpack(msgstr)
+    Log.info("recv " .. fd .. " [" .. cmd .. "] {" .. table.concat(msg, ",") .. "}")
+
+    local conn = Global.conns[fd]
+    local playerid = conn.playerid
+    if not playerid then
+        -- 未完成过登录
+        local node = Skynet.getenv("node")
+        local node_cfg = RunCfg[node]
+        local loginid = math.random(1, #node_cfg.login)
+        local login = "login" .. loginid
+        Skynet.send(login, "lua", "client", fd, cmd, msg)
+    else
+        -- 之前已经登录
+        local gplayer = Global.players[playerid]
+        local agent = gplayer.agent
+        Skynet.send(agent, "lua", "client", cmd, msg)
+    end
 end
 
 local function process_buff(fd, readbuff)
+    while true do
+        local msgstr, rest = string.match(readbuff, "(.-)\r\n(.*)")
+        if msgstr then
+            readbuff = rest
+            process_msg(fd, msgstr)
+        else
+            return readbuff
+        end
+    end
 end
 
 local function disconnect(fd)
+    local conn = Global.conns[fd]
+    if not conn then
+        return
+    end
+    Global.conns[fd] = nil
+
+    local playerid = conn.playerid
+    if not playerid then
+        -- 未完成登录
+        return
+    end
+    -- 已在游戏中
+    Global.players[playerid] = nil
+
+    Skynet.call("agentmgr", "lua", "reqkick", playerid, "断线")
 end
 
 -- 每一条连接接收数据处理
@@ -54,9 +83,10 @@ end
 
 local function connect(fd, addr)
     Log.info("connect from " .. addr .. " " .. fd)
-    local c = conn()
-    conns[fd] = c
-    c.fd = fd
+    local conn = {
+        fd = fd
+    }
+    Global.conns[fd] = conn
     Skynet.fork(recv_loop, fd)
 end
 

@@ -23,7 +23,7 @@ local function dispatch(session, address, cmd, ...)
     local ok, err = pcall(fun, address, ...)
     if not ok then
         traceback(err)
-    end 
+    end
 end
 
 local function init()
