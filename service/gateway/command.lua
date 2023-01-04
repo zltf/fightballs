@@ -54,17 +54,21 @@ end
 function Command.kick(_, playerid)
     local gplayer = Global.players[playerid]
     if not gplayer then
+        Skynet.ret()
         return
     end
     Global.players[playerid] = nil
 
     local conn = gplayer.conn
     if not conn then
+        Skynet.ret()
         return
     end
     Global.conns[conn.fd] = nil
 
     Socket.close(conn.fd)
+
+    Skynet.ret()
 end
 
 return Command
