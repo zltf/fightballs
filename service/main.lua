@@ -8,11 +8,19 @@ Skynet.start(function()
     local node = Skynet.getenv("node")
     local node_cfg = RunCfg[node]
 
-    Skynet.newservice("gateway", "gateway", 1)
+    for i = 1, #node_cfg.gateway do
+        Skynet.newservice("gateway", "gateway", i)
+    end
 
     for i = 1, #node_cfg.login do
         Skynet.newservice("login", "login", i)
     end
+
+    if node == RunCfg.agentmgr.node then
+        Skynet.newservice("agentmgr", "agentmgr", 1)
+    end
+
+    Skynet.newservice("nodemgr", "nodemgr", 1)
 
     -- 退出自身
     Skynet.exit()
