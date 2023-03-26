@@ -1,4 +1,4 @@
-local skynet = require "skynet"
+local Skynet = require "skynet"
 local Service = require "service"
 
 local Command = require "command"

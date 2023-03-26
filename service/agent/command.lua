@@ -7,7 +7,7 @@ local Client = require "client"
 
 local Command = {}
 
-function Command.client(source, fd, cmd, msg)
+function Command.client(source, cmd, msg)
     Global.gate = source
     if Client[cmd] then
         local ret_msg = Client[cmd](source, msg)
@@ -22,6 +22,7 @@ end
 function Command.kick()
     -- 保存角色数据
     Skynet.sleep(200)
+    Skynet.ret()
 end
 
 function Command.exit()

@@ -1,5 +1,4 @@
 local Skynet = require "skynet"
-require "skynet.manager"
 local Cluster = require "skynet.cluster"
 local Log = require "log"
 
@@ -29,7 +28,6 @@ end
 
 local function init()
     Skynet.dispatch("lua", dispatch)
-    Skynet.register(string.format("%s%d", M.name, M.id))
     if M.init then
         M.init()
     end
