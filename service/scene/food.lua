@@ -10,8 +10,10 @@ M.food_maxid = 0
 M.food_count = 0
 
 function M.new()
+    M.food_count = M.food_count + 1
+    M.food_maxid = M.food_maxid + 1
     local m = {
-        id = nil,
+        id = M.food_maxid,
         x = mrandom(0, 100),
         y = mrandom(0, 100),
     }

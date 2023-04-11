@@ -4,6 +4,8 @@ local Log = require "log"
 local RunCfg = require "runconfig"
 local Cluster = require "skynet.cluster"
 
+local pairs = pairs
+
 Skynet.start(function()
     -- 初始化
     Log.info("[start main]")
@@ -37,6 +39,12 @@ Skynet.start(function()
     else
         local proxy = Cluster.proxy(RunCfg.agentmgr.node, "agentmgr")
         Skynet.name("agentmgr", proxy)
+    end
+
+    -- scene
+    for _, sid in pairs(RunCfg.scene[node] or {}) do
+        local srv = Skynet.newservice("scene", "scene", sid)
+        Skynet.name("scene" .. sid, srv)
     end
 
     -- 退出自身

@@ -7,12 +7,6 @@ local Food = require "food"
 
 local Command = {}
 
-local function broadcast(msg)
-    for _, v in pairs(Global.balls) do
-        Service.send(v.node, v.agent, "send", msg)
-    end
-end
-
 -- 进入
 function Command.enter(_, playerid, node, agent)
     if Global.balls[playerid] then
@@ -22,7 +16,7 @@ function Command.enter(_, playerid, node, agent)
     local b = Ball.new(playerid, node, agent)
     -- 广播
     local entermsg = {"enter", playerid, b.x, b.y, b.size}
-    broadcast(entermsg)
+    Global.broadcast(entermsg)
     -- 记录
     Global.balls[playerid] = b
     -- 回应
@@ -42,10 +36,11 @@ function Command.leave(_, playerid)
     end
     Global.balls[playerid] = nil
     local leavemsg = {"leave", playerid}
-    broadcast(leavemsg)
+    Global.broadcast(leavemsg)
     Skynet.retpack(true)
 end
 
+-- 改变速度
 function Command.shift(_, playerid, x, y)
     local b = Global.balls[playerid]
     if not b then

@@ -2,10 +2,9 @@ local Global = require "global"
 
 local tinsert = table.insert
 local pairs = pairs
+local mrandom = math.random
 
 local M = {}
-
-local mrandom = math.random
 
 function M.new(playerid, node, agent)
     local m = {
