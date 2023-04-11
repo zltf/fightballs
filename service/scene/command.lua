@@ -13,6 +13,7 @@ local function broadcast(msg)
     end
 end
 
+-- 进入
 function Command.enter(_, playerid, node, agent)
     if Global.balls[playerid] then
         Skynet.retpack(false)
@@ -31,6 +32,16 @@ function Command.enter(_, playerid, node, agent)
     Service.send(b.node, b.agent, "send", Ball.balllist_msg())
     Service.send(b.node, b.agent, "send", Food.foodlist_msg())
     Skynet.retpack(true)
+end
+
+-- 退出
+function Command.leave(_, playerid)
+    if not Global.balls[playerid] then
+        return false
+    end
+    Global.balls[playerid] = nil
+    local leavemsg = {"leave", playerid}
+    broadcast(leavemsg)
 end
 
 return Command
