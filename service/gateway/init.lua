@@ -8,11 +8,15 @@ local Pack = require "pack"
 local Command = require "command"
 local Global = require "global"
 
+local tconcat = table.concat
+local mrandom = math.random
+local smatch = string.match
+
 Service.cmd = Command
 
 local function process_msg(fd, msgstr)
     local cmd, msg = Pack.str_unpack(msgstr)
-    Log.info("recv " .. fd .. " [" .. cmd .. "] {" .. table.concat(msg, ",") .. "}")
+    Log.info("recv " .. fd .. " [" .. cmd .. "] {" .. tconcat(msg, ",") .. "}")
 
     local conn = Global.conns[fd]
     local playerid = conn.playerid
@@ -20,7 +24,7 @@ local function process_msg(fd, msgstr)
         -- 未完成过登录
         local node = Skynet.getenv("node")
         local node_cfg = RunCfg[node]
-        local loginid = math.random(1, #node_cfg.login)
+        local loginid = mrandom(1, #node_cfg.login)
         local login = "login" .. loginid
         Skynet.send(login, "lua", "client", fd, cmd, msg)
     else
@@ -33,7 +37,7 @@ end
 
 local function process_buff(fd, readbuff)
     while true do
-        local msgstr, rest = string.match(readbuff, "(.-)\r\n(.*)")
+        local msgstr, rest = smatch(readbuff, "(.-)\r\n(.*)")
         if msgstr then
             readbuff = rest
             process_msg(fd, msgstr)

@@ -5,6 +5,8 @@ local Pack = require "pack"
 
 local Global = require "global"
 
+local tconcat = table.concat
+
 local Command = {}
 
 function Command.send_by_fd(_, fd, msg)
@@ -13,7 +15,7 @@ function Command.send_by_fd(_, fd, msg)
     end
 
     local buff = Pack.str_pack(msg[1], msg)
-    Log.info("send " .. fd .. " [" .. msg[1] .. "] {" .. table.concat(msg, ",") .. "}")
+    Log.info("send " .. fd .. " [" .. msg[1] .. "] {" .. tconcat(msg, ",") .. "}")
     Socket.write(fd, buff)
 end
 

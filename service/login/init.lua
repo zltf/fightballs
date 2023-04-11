@@ -2,6 +2,8 @@ local Skynet = require "skynet"
 local Service = require "service"
 local Log = require "log"
 
+local tonumber = tonumber
+
 local client = {}
 
 function client.login(source, fd, msg)

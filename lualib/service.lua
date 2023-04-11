@@ -2,6 +2,12 @@ local Skynet = require "skynet"
 local Cluster = require "skynet.cluster"
 local Log = require "log"
 
+local tonumber = tonumber
+local pcall = pcall
+local assert = assert
+local tostring = tostring
+local dtraceback = debug.traceback
+
 local M = {
     -- 类型和id
     name = "",
@@ -15,7 +21,7 @@ local M = {
 
 local function traceback(err)
     Log.error(tostring(err))
-    Log.error(debug.traceback())
+    Log.error(dtraceback())
 end
 
 local function dispatch(session, address, cmd, ...)
