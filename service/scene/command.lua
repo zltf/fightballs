@@ -37,11 +37,24 @@ end
 -- 退出
 function Command.leave(_, playerid)
     if not Global.balls[playerid] then
-        return false
+        Skynet.retpack(false)
+        return
     end
     Global.balls[playerid] = nil
     local leavemsg = {"leave", playerid}
     broadcast(leavemsg)
+    Skynet.retpack(true)
+end
+
+function Command.shift(_, playerid, x, y)
+    local b = Global.balls[playerid]
+    if not b then
+        Skynet.retpack(false)
+        return
+    end
+    b.speedx = x
+    b.speedy = y
+    Skynet.retpack(true)
 end
 
 return Command
